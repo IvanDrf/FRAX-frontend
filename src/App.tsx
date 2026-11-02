@@ -12,7 +12,7 @@ function App() {
           <Route path="/" element={<CatalogPage />} />
           <Route path="/reels" element={<ReelsPage />} />
           <Route path="/reels/:id" element={<ReelsPage />} />
-          <Route path="/add" element={<AddPage />} />
+          {<Route path="/add" element={<AddPage />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <TabBar />

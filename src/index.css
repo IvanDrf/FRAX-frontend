@@ -826,3 +826,25 @@ video.minio-preview {
     font-size: 10px;
     color: var(--gray);
 }
+
+/* Стили для недоступных кнопок в таб-панели */
+.tab-button.disabled {
+    color: #A0A0A0;
+    border-color: #D1D1D1;
+    background: var(--frax-bg);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.tab-button.disabled:hover {
+    color: #A0A0A0;
+    background: var(--frax-bg);
+    border-color: #D1D1D1;
+    transform: none;
+    box-shadow: none;
+}
+
+.tab-button.disabled svg {
+    stroke: #A0A0A0;
+}

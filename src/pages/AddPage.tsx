@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ChangeEvent, SubmitEventHandler } from 'react'
 
 const DEFAULT_IMAGE = '/default.png'
@@ -24,21 +24,43 @@ export const AddPage = () => {
   const [imageName, setImageName] = useState('Файл не выбран')
   const [videoName, setVideoName] = useState('Файл не выбран')
 
+  const [imageUrl, setImageUrl] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl)
+    }
+  }, [imageUrl])
+
+  useEffect(() => {
+    return () => {
+      if (videoUrl) URL.revokeObjectURL(videoUrl)
+    }
+  }, [videoUrl])
+
   const handleFileChange = (
     e: ChangeEvent<HTMLInputElement>,
-    setter: (v: string) => void,
+    setName: (v: string) => void,
+    setUrl: (v: string) => void,
   ) => {
     const file = e.target.files?.[0]
-    setter(file ? file.name : 'Файл не выбран')
+    if (file) {
+      setName(file.name)
+      setUrl(URL.createObjectURL(file))
+    } else {
+      setName('Файл не выбран')
+      setUrl('')
+    }
   }
 
-  const handleNameSubmit: SubmitEventHandler<HTMLFormElement>  = (e) => {
+  const handleNameSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault()
     if (!form.name.trim()) return
     setStep('details')
   }
 
-  const handlePublish :SubmitEventHandler<HTMLFormElement>  = (e) => {
+  const handlePublish: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault()
 
     console.log('Опубликовать фактор:', form)
@@ -46,6 +68,9 @@ export const AddPage = () => {
     setForm(EMPTY_FORM)
     setImageName('Файл не выбран')
     setVideoName('Файл не выбран')
+
+    setImageUrl('')
+    setVideoUrl('')
   }
 
   return (
@@ -64,14 +89,16 @@ export const AddPage = () => {
             <img
               className="minio-preview"
               alt="Изображение по умолчанию"
-              src={DEFAULT_IMAGE}
+              src={imageUrl || DEFAULT_IMAGE}
             />
             <label className="file-field-custom">
               <input
                 type="file"
                 accept="image/*"
                 aria-label="Изображение"
-                onChange={(e) => handleFileChange(e, setImageName)}
+                onChange={(e) =>
+                  handleFileChange(e, setImageName, setImageUrl)
+                }
               />
               <span className="file-button">Выбрать файл</span>
               <span className="file-name">{imageName}</span>
@@ -85,14 +112,16 @@ export const AddPage = () => {
               controls
               preload="metadata"
               playsInline
-              src={DEFAULT_VIDEO}
+              src={videoUrl || DEFAULT_VIDEO}
             />
             <label className="file-field-custom">
               <input
                 type="file"
                 accept="video/*"
                 aria-label="Видео"
-                onChange={(e) => handleFileChange(e, setVideoName)}
+                onChange={(e) =>
+                  handleFileChange(e, setVideoName, setVideoUrl)
+                }
               />
               <span className="file-button">Выбрать файл</span>
               <span className="file-name">{videoName}</span>
@@ -125,7 +154,7 @@ export const AddPage = () => {
             <h2>Изображение</h2>
             <img
               className="minio-preview"
-              src={DEFAULT_IMAGE}
+              src={imageUrl || DEFAULT_IMAGE}
               alt={form.name}
             />
           </section>
@@ -134,7 +163,7 @@ export const AddPage = () => {
             <h2>Видео</h2>
             <video
               className="minio-preview"
-              src={DEFAULT_VIDEO}
+              src={videoUrl || DEFAULT_VIDEO}
               controls
               preload="metadata"
               playsInline
