@@ -15,6 +15,8 @@ Frontend-часть SPA (Single Page Application) для просмотра и �
 
 3) Добавление — `src/pages/AddPage.tsx`
 
+4) Регистрация/Логин - `src/pages/AuthPage.tsx`
+
 ## Как запустить приложение
 
 ```bash

@@ -848,3 +848,60 @@ video.minio-preview {
 .tab-button.disabled svg {
     stroke: #A0A0A0;
 }
+
+.auth-form {
+    margin-top: 8px;
+}
+
+.auth-form .next-button {
+    margin-top: 22px;
+}
+
+.auth-message {
+    margin-top: 16px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.auth-error {
+    background: #FDE8EB;
+    color: var(--frax-red);
+    border: 1px solid var(--frax-red);
+}
+
+.auth-success {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #2E7D32;
+}
+
+.auth-toggle {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--frax-red);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.2s;
+    border-radius: var(--frax-radius);
+}
+
+.auth-toggle:hover {
+    color: var(--hover-red);
+    text-decoration: underline;
+}
+
+.auth-toggle:focus-visible {
+    outline: 2px solid var(--frax-red);
+    outline-offset: 4px;
+}
