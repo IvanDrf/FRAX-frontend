@@ -13,5 +13,5 @@ export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { UserSchema } from './models/UserSchema';
 export type { ValidationError } from './models/ValidationError';
 
-export { FraxService } from './services/FraxService';
+export { RiskFactorsService } from './services/RiskFactorsService';
 export { UsersService } from './services/UsersService';

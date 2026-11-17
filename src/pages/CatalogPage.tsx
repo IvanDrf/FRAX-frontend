@@ -1,23 +1,21 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import type { ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { RISK_FACTORS } from '../modules/mock'
+import { useAppDispatch, useAppSelector } from '../app/hooks'
+import { fetchRiskFactors, deleteRiskFactor } from '../entities/risk-factor/riskFactorThunks'
+import { weightChanged } from '../features/risk-factor-filter/filterSlice'
+import { mediaUrl } from '../shared/lib/media'
 
 const DEFAULT_IMAGE = '/default.png'
 
 export const CatalogPage = () => {
-  const [factors, setFactors] = useState(RISK_FACTORS)
-  const [weightFilter, setWeightFilter] = useState(0)
-
-  const visibleFactors = factors.filter((f) => f.weight >= weightFilter)
-
-  const handleSlider = (e: ChangeEvent<HTMLInputElement>) => {
-    setWeightFilter(Number(e.target.value))
-  }
-
-  const handleDelete = (id: number) => {
-    setFactors((prev) => prev.filter((f) => f.id !== id))
-  }
+  const dispatch = useAppDispatch()
+  const weightFilter = useAppSelector(s => s.riskFactorFilter.weight)
+  const username = useAppSelector(s => s.session.username)
+  const { items: visibleFactors, error } = useAppSelector(s => s.riskFactors)
+  useEffect(() => { void dispatch(fetchRiskFactors(weightFilter)) }, [dispatch, weightFilter, username])
+  const handleSlider = (e: ChangeEvent<HTMLInputElement>) => { dispatch(weightChanged(Number(e.target.value))) }
+  const handleDelete = (id: number) => { void dispatch(deleteRiskFactor(id)) }
 
   return (
     <main className="tabbed-page">
@@ -27,7 +25,7 @@ export const CatalogPage = () => {
       </header>
 
       <p className="filter-hint">
-        Фильтр по весу фактора. Значение 0 — все опубликованные.
+        Фильтр по весу фактора. Показываем вес больше выбранного. 0 — все опубликованные.
       </p>
 
       <form className="weight-form" onSubmit={(e) => e.preventDefault()}>
@@ -58,20 +56,21 @@ export const CatalogPage = () => {
         </div>
       </form>
 
+      {error && <p className="auth-message auth-error" role="alert">{error}</p>}
       <div className="factors-grid">
         {visibleFactors.map((factor) => (
           <div className="factor-card" key={factor.id}>
             <Link className="factor-card-link" to={`/reels/${factor.id}`}>
               <img
                 className="card-image"
-                src={factor.image_url || DEFAULT_IMAGE}
+                src={mediaUrl(factor.image_url, DEFAULT_IMAGE)}
                 alt={factor.name}
               />
               <div className="card-body">
                 <h2>{factor.name}</h2>
                 <div className="card-footer">
                   <span>
-                    Лайки <strong>{factor.likes_count}</strong>
+                    Лайки <strong>{factor.likes}</strong>
                   </span>
                   <span>
                     Вес <strong>{factor.weight}</strong>
@@ -83,7 +82,7 @@ export const CatalogPage = () => {
               </div>
             </Link>
 
-            <form
+            {username && factor.is_creator && <form
               className="delete-form"
               onSubmit={(e) => {
                 e.preventDefault()
@@ -97,7 +96,7 @@ export const CatalogPage = () => {
               >
                 Удалить
               </button>
-            </form>
+            </form>}
           </div>
         ))}
       </div>

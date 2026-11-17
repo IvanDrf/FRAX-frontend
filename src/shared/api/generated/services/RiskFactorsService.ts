@@ -7,7 +7,7 @@ import type { Body_publish_factor_api_factors_draft__factor_id__put } from '../m
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-export class FraxService {
+export class RiskFactorsService {
     /**
      * Get Risk Factors
      * @param riskFactorWeight
@@ -15,7 +15,7 @@ export class FraxService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getRiskFactorsApiFactorsGet(
+    public static getRiskFactors(
         riskFactorWeight?: (number | null),
         sessionId?: (string | null),
     ): CancelablePromise<any> {
@@ -39,7 +39,7 @@ export class FraxService {
      * @returns void
      * @throws ApiError
      */
-    public static deleteRiskFactorApiFactorsRiskFactorIdDelete(
+    public static deleteRiskFactor(
         riskFactorId: number,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
@@ -61,7 +61,7 @@ export class FraxService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getRiskFactorInfoApiFactorsReelsGet(
+    public static getRiskFactorReel(
         riskFactorId?: (number | null),
         next: boolean = false,
         sessionId?: (string | null),
@@ -86,7 +86,7 @@ export class FraxService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getDraftFactorApiFactorsDraftGet(): CancelablePromise<any> {
+    public static getRiskFactorDraft(): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/factors/draft',
@@ -98,7 +98,7 @@ export class FraxService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static createDraftFactorApiFactorsDraftPost(
+    public static createRiskFactorDraft(
         formData: Body_create_draft_factor_api_factors_draft_post,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -118,7 +118,7 @@ export class FraxService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static publishFactorApiFactorsDraftFactorIdPut(
+    public static publishRiskFactor(
         factorId: number,
         formData: Body_publish_factor_api_factors_draft__factor_id__put,
     ): CancelablePromise<any> {
@@ -142,7 +142,7 @@ export class FraxService {
      * @returns void
      * @throws ApiError
      */
-    public static addLikeApiFactorsLikePost(
+    public static setRiskFactorLike(
         riskFactorId: number,
         addLike: boolean,
     ): CancelablePromise<void> {

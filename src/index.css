@@ -905,3 +905,29 @@ video.minio-preview {
     outline: 2px solid var(--frax-red);
     outline-offset: 4px;
 }
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(242, 242, 242, .8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-weight: 700;
+}
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--frax-red);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.feed-notice { position: absolute; top: 64px; left: 16px; right: 16px; z-index: 10; padding: 12px; border-radius: 12px; }
+.interest-mark { background: transparent; border: 0; cursor: pointer; }
+.interest-mark.liked svg { fill: var(--frax-red); }
+.interest-mark:not(.liked):hover svg { fill: white; }
+button:disabled { opacity: .6; cursor: wait; }
+.nav-error { position: absolute; bottom: 100%; left: 0; right: 0; padding: 12px; font-size: 12px; }

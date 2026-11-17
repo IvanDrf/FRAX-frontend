@@ -6,5 +6,7 @@ export interface RiskFactor {
     video_url: string;
     weight: number;
     prevalence: number;
-    likes_count: number;
+    likes: number;
+    is_liked: boolean;
+    is_creator: boolean;
 }

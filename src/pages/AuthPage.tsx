@@ -1,5 +1,10 @@
 import { useState } from 'react'
 import type { SubmitEventHandler } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../app/hooks'
+import { authStarted, loggedIn, authFailed } from '../entities/session/sessionSlice'
+import { loginRequest, registerRequest } from '../entities/session/authApi'
+import { errorMessage } from '../shared/lib/apiError'
 
 type AuthMode = 'login' | 'register'
 
@@ -16,10 +21,12 @@ const EMPTY_FORM: AuthForm = {
 }
 
 export const AuthPage = () => {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const username = useAppSelector(s => s.session.username)
   const [mode, setMode] = useState<AuthMode>('login')
   const [form, setForm] = useState<AuthForm>(EMPTY_FORM)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   const isRegister = mode === 'register'
 
@@ -27,13 +34,11 @@ export const AuthPage = () => {
     setMode(isRegister ? 'login' : 'register')
     setForm(EMPTY_FORM)
     setError('')
-    setSuccess('')
   }
 
-  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
     setError('')
-    setSuccess('')
 
     const username = form.username.trim()
     const password = form.password
@@ -57,16 +62,25 @@ export const AuthPage = () => {
         return
       }
 
-      console.log('Регистрация:', { username, password })
-      setSuccess('Аккаунт успешно создан. Теперь можно войти.')
+    }
+
+    dispatch(authStarted())
+    try {
+      if (isRegister) {
+        await registerRequest(username, password)
+      }
+      await loginRequest(username, password)
+      dispatch(loggedIn(username))
       setForm(EMPTY_FORM)
-      setMode('login')
-    } else {
-      console.log('Вход:', { username, password })
-      setSuccess(`Вы вошли как ${username}`)
-      setForm(EMPTY_FORM)
+      navigate('/')
+    } catch (error) {
+      const message = errorMessage(error)
+      dispatch(authFailed(message))
+      setError(message)
     }
   }
+
+  if (username) return <Navigate to="/" replace />
 
   return (
     <main className="tabbed-page">
@@ -140,11 +154,7 @@ export const AuthPage = () => {
             {error}
           </p>
         )}
-        {success && (
-          <p className="auth-message auth-success" role="status">
-            {success}
-          </p>
-        )}
+
 
         <button className="next-button" type="submit">
           {isRegister ? 'Зарегистрироваться' : 'Войти'}

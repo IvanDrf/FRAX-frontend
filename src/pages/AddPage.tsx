@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import type { ChangeEvent, SubmitEventHandler } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../app/hooks'
+import { fetchRiskFactorDraft, createRiskFactorDraft, publishRiskFactor, deleteRiskFactor } from '../entities/risk-factor/riskFactorThunks'
+import { mediaUrl } from '../shared/lib/media'
 
 const DEFAULT_IMAGE = '/default.png'
 const DEFAULT_VIDEO = '/default.mp4'
@@ -14,12 +18,19 @@ interface FormState {
 const EMPTY_FORM: FormState = {
   name: '',
   description: '',
-  weight: '0',
+  weight: '1',
   prevalence: '0',
 }
 
 export const AddPage = () => {
-  const [step, setStep] = useState<'name' | 'details'>('name')
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const username = useAppSelector(s => s.session.username)
+  const { draft, error } = useAppSelector(s => s.riskFactors)
+  const step = draft ? 'details' : 'name'
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  useEffect(() => { if (username) void dispatch(fetchRiskFactorDraft()) }, [dispatch, username])
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [imageName, setImageName] = useState('Файл не выбран')
   const [videoName, setVideoName] = useState('Файл не выбран')
@@ -43,8 +54,10 @@ export const AddPage = () => {
     e: ChangeEvent<HTMLInputElement>,
     setName: (v: string) => void,
     setUrl: (v: string) => void,
+    setFile: (v: File | null) => void,
   ) => {
     const file = e.target.files?.[0]
+    setFile(file ?? null)
     if (file) {
       setName(file.name)
       setUrl(URL.createObjectURL(file))
@@ -54,24 +67,20 @@ export const AddPage = () => {
     }
   }
 
-  const handleNameSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
+  const handleNameSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
-    if (!form.name.trim()) return
-    setStep('details')
+    if (!form.name.trim() || !imageFile || !videoFile) return
+    await dispatch(createRiskFactorDraft({ name: form.name.trim(), image: imageFile, video: videoFile }))
   }
 
-  const handlePublish: SubmitEventHandler<HTMLFormElement> = (e) => {
+  const handlePublish: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
-
-    console.log('Опубликовать фактор:', form)
-    setStep('name')
-    setForm(EMPTY_FORM)
-    setImageName('Файл не выбран')
-    setVideoName('Файл не выбран')
-
-    setImageUrl('')
-    setVideoUrl('')
+    if (!draft) return
+    const result = await dispatch(publishRiskFactor({ id: draft.id, description: form.description.trim(), weight: Number(form.weight), prevalence: Number(form.prevalence) }))
+    if (publishRiskFactor.fulfilled.match(result)) navigate('/')
   }
+
+  if (!username) return <Navigate to="/auth" replace />
 
   return (
     <main className="tabbed-page">
@@ -82,6 +91,7 @@ export const AddPage = () => {
         </h1>
       </header>
 
+      {error && <p className="auth-message auth-error" role="alert">{error}</p>}
       {step === 'name' && (
         <form onSubmit={handleNameSubmit}>
           <section className="minio-block">
@@ -89,15 +99,16 @@ export const AddPage = () => {
             <img
               className="minio-preview"
               alt="Изображение по умолчанию"
-              src={imageUrl || DEFAULT_IMAGE}
+              src={imageUrl || mediaUrl(draft?.image_url, DEFAULT_IMAGE)}
             />
             <label className="file-field-custom">
               <input
                 type="file"
+                required
                 accept="image/*"
                 aria-label="Изображение"
                 onChange={(e) =>
-                  handleFileChange(e, setImageName, setImageUrl)
+                  handleFileChange(e, setImageName, setImageUrl, setImageFile)
                 }
               />
               <span className="file-button">Выбрать файл</span>
@@ -112,15 +123,16 @@ export const AddPage = () => {
               controls
               preload="metadata"
               playsInline
-              src={videoUrl || DEFAULT_VIDEO}
+              src={videoUrl || mediaUrl(draft?.video_url, DEFAULT_VIDEO)}
             />
             <label className="file-field-custom">
               <input
                 type="file"
+                required
                 accept="video/*"
                 aria-label="Видео"
                 onChange={(e) =>
-                  handleFileChange(e, setVideoName, setVideoUrl)
+                  handleFileChange(e, setVideoName, setVideoUrl, setVideoFile)
                 }
               />
               <span className="file-button">Выбрать файл</span>
@@ -148,14 +160,15 @@ export const AddPage = () => {
         </form>
       )}
 
-      {step === 'details' && (
+      {draft && (
         <form onSubmit={handlePublish}>
+          <p className="filter-hint">Черновик: {draft.name}</p>
           <section className="minio-block">
             <h2>Изображение</h2>
             <img
               className="minio-preview"
-              src={imageUrl || DEFAULT_IMAGE}
-              alt={form.name}
+              src={imageUrl || mediaUrl(draft?.image_url, DEFAULT_IMAGE)}
+              alt={draft.name}
             />
           </section>
 
@@ -163,7 +176,7 @@ export const AddPage = () => {
             <h2>Видео</h2>
             <video
               className="minio-preview"
-              src={videoUrl || DEFAULT_VIDEO}
+              src={videoUrl || mediaUrl(draft?.video_url, DEFAULT_VIDEO)}
               controls
               preload="metadata"
               playsInline
@@ -194,7 +207,7 @@ export const AddPage = () => {
             name="weight"
             type="number"
             step="0.1"
-            min="0"
+            min="1"
             max="2"
             required
             value={form.weight}
@@ -219,6 +232,7 @@ export const AddPage = () => {
             }
           />
 
+          <button type="button" className="auth-toggle" onClick={() => void dispatch(deleteRiskFactor(draft.id))}>Удалить черновик</button>
           <button className="next-button" type="submit">
             Опубликовать
           </button>

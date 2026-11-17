@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type Body_create_draft_factor_api_factors_draft_post = {
     name: string;
-    image: string;
-    video: string;
+    image: Blob;
+    video: Blob;
 };
 
